@@ -154,7 +154,7 @@ export const generateBall = async (req, res) => {
         });
     } catch (error) {
         return errorResponse(res, {
-            httpCode: 500,
+            httpCode: 200,
             code: "GB003",
             message: error.message
         });

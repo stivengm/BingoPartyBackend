@@ -106,11 +106,7 @@ export const getRoomService = async (roomId) => {
     return snapshot.val();
 };
 
-
-export const generateBallService = async (
-    roomId,
-    playerId
-) => {
+export const generateBallService = async (roomId, playerId) => {
 
     const roomRef = db.ref(`rooms/${roomId}`);
     const snapshot = await roomRef.once('value');
@@ -129,8 +125,7 @@ export const generateBallService = async (
 
     const calledBalls = room.calledBalls || {};
 
-    const usedNumbers = Object.values(calledBalls)
-        .map(ball => ball.number);
+    const usedNumbers = Object.values(calledBalls).map(ball => ball.number);
 
     const availableNumbers = [];
 
@@ -159,10 +154,15 @@ export const generateBallService = async (
         calledAt: Date.now()
     };
 
-    await roomRef.update({
-        currentBall: ball,
-        [`calledBalls/${value}`]: ball
-    });
+    // Guardar bolita actual
+    await roomRef
+        .child('currentBall')
+        .set(ball);
+
+    // Guardar historial manteniendo orden cronológico
+    await roomRef
+        .child('calledBalls')
+        .push(ball);
 
     return ball;
 
