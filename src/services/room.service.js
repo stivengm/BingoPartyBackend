@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import db from '../config/firebase.js';
 import { generateRoomCode } from '../utils/generateRoomCode.js';
+import { getLetter } from '../utils/getLetterBall.js';
 
 export const createRoomService = async (hostName, gameBoardType, secondsBalls, gameType) => {
 
@@ -103,4 +104,66 @@ export const getRoomService = async (roomId) => {
     }
 
     return snapshot.val();
+};
+
+
+export const generateBallService = async (
+    roomId,
+    playerId
+) => {
+
+    const roomRef = db.ref(`rooms/${roomId}`);
+    const snapshot = await roomRef.once('value');
+
+    if (!snapshot.exists()) {
+        throw new Error('Sala no encontrada');
+    }
+
+    const room = snapshot.val();
+
+    const player = room.players?.[playerId];
+
+    if (!player?.isHost) {
+        throw new Error('Solo el host puede generar bolitas');
+    }
+
+    const calledBalls = room.calledBalls || {};
+
+    const usedNumbers = Object.values(calledBalls)
+        .map(ball => ball.number);
+
+    const availableNumbers = [];
+
+    for (let i = 1; i <= 75; i++) {
+        if (!usedNumbers.includes(i)) {
+            availableNumbers.push(i);
+        }
+    }
+
+    if (availableNumbers.length === 0) {
+        throw new Error('No hay más bolitas disponibles');
+    }
+
+    const randomIndex = Math.floor(
+        Math.random() * availableNumbers.length
+    );
+
+    const number = availableNumbers[randomIndex];
+    const letter = getLetter(number);
+    const value = `${letter}${number}`;
+
+    const ball = {
+        letter,
+        number,
+        value,
+        calledAt: Date.now()
+    };
+
+    await roomRef.update({
+        currentBall: ball,
+        [`calledBalls/${value}`]: ball
+    });
+
+    return ball;
+
 };

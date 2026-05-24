@@ -2,7 +2,8 @@ import {
     createRoomService,
     joinRoomService,
     getRoomService,
-    updateRoomService
+    updateRoomService,
+    generateBallService
 } from '../services/room.service.js';
 
 import {
@@ -120,6 +121,41 @@ export const getRoom = async (req, res) => {
     } catch (error) {
 
         return res.status(404).json({
+            message: error.message
+        });
+    }
+};
+
+export const generateBall = async (req, res) => {
+    try {
+        const {
+            roomId,
+            playerId
+        } = req.body;
+
+        if (!roomId || !playerId) {
+            return errorResponse(res, {
+                httpCode: 400,
+                code: "GB002",
+                message: 'Hace falta información'
+            });
+        }
+
+        const ball = await generateBallService(
+            roomId,
+            playerId
+        );
+
+        return successResponse(res, {
+            httpCode: 200,
+            code: "GB001",
+            message: 'Bolita generada',
+            data: ball
+        });
+    } catch (error) {
+        return errorResponse(res, {
+            httpCode: 500,
+            code: "GB003",
             message: error.message
         });
     }
