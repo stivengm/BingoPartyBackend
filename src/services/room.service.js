@@ -16,7 +16,8 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
         gameTypeName: gameType == 1 ? 'automatic' : 'manual',
         host: {
             id: crypto.randomUUID(),
-            name: hostName
+            name: hostName,
+            isHost: true
         },
         players: {}
     };
@@ -33,9 +34,36 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
     return roomData;
 };
 
-export const updateRoomService = async(roomId, hostId) => {
+export const updateRoomService = async (roomId, playerId, status) => {
+    const roomRef = db.ref(`rooms/${roomId}`);
+    const snapshot = await roomRef.once('value');
 
-}
+    if (!snapshot.exists()) {
+        throw new Error('Sala no encontrada');
+    }
+
+    const room = snapshot.val();
+    const player = room.players?.[playerId];
+
+    if (!player) {
+        throw new Error('Jugador no encontrado');
+    }
+
+    if (status == "playing") {
+        if (!player.isHost) {
+            throw new Error('No tienes permisos para actualizar la sala');
+        }
+    }
+
+    await roomRef.update({
+        status
+    });
+
+    const updatedSnapshot = await roomRef.once('value');
+
+    return updatedSnapshot.val();
+
+};
 
 export const joinRoomService = async (roomId, playerName) => {
 

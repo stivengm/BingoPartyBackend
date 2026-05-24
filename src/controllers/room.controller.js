@@ -1,7 +1,8 @@
 import {
     createRoomService,
     joinRoomService,
-    getRoomService
+    getRoomService,
+    updateRoomService
 } from '../services/room.service.js';
 
 import {
@@ -38,10 +39,6 @@ export const createRoom = async (req, res) => {
     }
 };
 
-export const updateRoom = async (req, res) => {
-    
-}
-
 export const joinRoom = async (req, res) => {
 
     try {
@@ -57,11 +54,54 @@ export const joinRoom = async (req, res) => {
 
         const response = await joinRoomService(roomId, playerName);
 
-        return res.status(200).json(response);
+        return successResponse(res, {
+            httpCode: 200,
+            code: "JR001",
+            message: 'Usuario ingresado correctamente',
+            data: response
+        });
     } catch (error) {
         return errorResponse(res, {
             httpCode: 500,
             code: "JR003",
+            message: error.message
+        });
+    }
+};
+
+export const updateRoom = async (req, res) => {
+    try {
+        const {
+            roomId,
+            playerId,
+            status
+        } = req.body;
+
+        if (!roomId || !playerId || !status) {
+            return errorResponse(res, {
+                httpCode: 400,
+                code: "UR002",
+                message: 'Hace falta información en la petición'
+            });
+        }
+
+        const room = await updateRoomService(
+            roomId,
+            playerId,
+            status
+        );
+
+        return successResponse(res, {
+            httpCode: 200,
+            code: "UR001",
+            message: 'Sala actualizada correctamente',
+            data: room
+        });
+
+    } catch (error) {
+        return errorResponse(res, {
+            httpCode: 500,
+            code: "UR003",
             message: error.message
         });
     }
