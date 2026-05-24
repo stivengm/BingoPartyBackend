@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import db from '../config/firebase.js';
 import { generateRoomCode } from '../utils/generateRoomCode.js';
 
-export const createRoomService = async (hostName) => {
+export const createRoomService = async (hostName, gameBoardType, secondsBalls, gameType) => {
 
     const roomCode = generateRoomCode();
 
@@ -10,6 +10,10 @@ export const createRoomService = async (hostName) => {
         id: roomCode,
         status: 'waiting',
         createdAt: Date.now(),
+        gameBoardType,
+        secondsBalls,
+        gameType,
+        gameTypeName: gameType == 1 ? 'automatic' : 'manual',
         host: {
             id: crypto.randomUUID(),
             name: hostName
@@ -28,6 +32,10 @@ export const createRoomService = async (hostName) => {
 
     return roomData;
 };
+
+export const updateRoomService = async(roomId, hostId) => {
+
+}
 
 export const joinRoomService = async (roomId, playerName) => {
 

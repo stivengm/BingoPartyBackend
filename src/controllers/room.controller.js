@@ -12,17 +12,17 @@ import {
 export const createRoom = async (req, res) => {
 
     try {
-        const { hostName } = req.body;
+        const { hostName, gameBoardType, secondsBalls, gameType } = req.body;
 
-        if (!hostName) {
+        if (!hostName || !gameBoardType || !secondsBalls || !gameType) {
             return errorResponse(res, {
                 httpCode: 400,
                 code: "CR002",
-                message: 'El nombre es requerido'
+                message: 'Hace falta información en la petición'
             });
         }
 
-        const room = await createRoomService(hostName);
+        const room = await createRoomService(hostName, gameBoardType, secondsBalls, gameType);
 
         return successResponse(res, {
             httpCode: 201,
@@ -37,6 +37,10 @@ export const createRoom = async (req, res) => {
         });
     }
 };
+
+export const updateRoom = async (req, res) => {
+    
+}
 
 export const joinRoom = async (req, res) => {
 
