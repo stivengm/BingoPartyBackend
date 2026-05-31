@@ -57,7 +57,40 @@ export const updateRoomService = async (roomId, playerId, status) => {
     }
 
     await roomRef.update({
-        status
+        status,
+    });
+
+    const updatedSnapshot = await roomRef.once('value');
+
+    return updatedSnapshot.val();
+
+};
+
+export const pauseRoomService = async (roomId, playerId, status, board) => {
+    const roomRef = db.ref(`rooms/${roomId}`);
+    const snapshot = await roomRef.once('value');
+
+    if (!snapshot.exists()) {
+        throw new Error('Sala no encontrada');
+    }
+
+    const room = snapshot.val();
+    const player = room.players?.[playerId];
+
+    if (!player) {
+        throw new Error('Jugador no encontrado');
+    }
+
+    if (status == "playing") {
+        if (!player.isHost) {
+            throw new Error('No tienes permisos para actualizar la sala');
+        }
+    }
+
+    await roomRef.update({
+        status,
+        playerLastUpdateGame: player,
+        boardLastUpdateGame: board
     });
 
     const updatedSnapshot = await roomRef.once('value');
@@ -75,23 +108,26 @@ export const joinRoomService = async (roomId, playerName) => {
         throw new Error('Sala no encontrada');
     }
 
-    const room = snapshot.val();
     const playerId = crypto.randomUUID();
 
-    room.players[playerId] = {
+    const player = {
         id: playerId,
         name: playerName,
         isHost: false,
         joinedAt: Date.now()
     };
 
-    await roomRef.update({
-        players: room.players
-    });
+    await roomRef
+        .child(`players/${playerId}`)
+        .set(player);
+
+    const updatedSnapshot = await roomRef.once('value');
+
+    const room = updatedSnapshot.val();
 
     return {
-        roomId,
-        playerId
+        ...room,
+        player
     };
 };
 

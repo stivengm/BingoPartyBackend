@@ -3,7 +3,8 @@ import {
     joinRoomService,
     getRoomService,
     updateRoomService,
-    generateBallService
+    generateBallService,
+    pauseRoomService
 } from '../services/room.service.js';
 
 import {
@@ -90,6 +91,46 @@ export const updateRoom = async (req, res) => {
             roomId,
             playerId,
             status
+        );
+
+        return successResponse(res, {
+            httpCode: 200,
+            code: "UR001",
+            message: 'Sala actualizada correctamente',
+            data: room
+        });
+
+    } catch (error) {
+        return errorResponse(res, {
+            httpCode: 500,
+            code: "UR003",
+            message: error.message
+        });
+    }
+};
+
+export const pauseRoom = async (req, res) => {
+    try {
+        const {
+            roomId,
+            playerId,
+            status,
+            board
+        } = req.body;
+
+        if (!roomId || !playerId || !status || !board) {
+            return errorResponse(res, {
+                httpCode: 400,
+                code: "UR002",
+                message: 'Hace falta información en la petición'
+            });
+        }
+
+        const room = await pauseRoomService(
+            roomId,
+            playerId,
+            status,
+            board
         );
 
         return successResponse(res, {
