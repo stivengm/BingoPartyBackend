@@ -4,20 +4,27 @@ import {
     getRoomService,
     updateRoomService,
     generateBallService,
-    pauseRoomService
+    updateRoomServiceUser
 } from '../services/room.service.js';
 
 import {
     successResponse,
     errorResponse
 } from '../utils/response.js';
+import { logger } from '../utils/logs.js';
 
 export const createRoom = async (req, res) => {
-
     try {
+        logger.info('INICIO DE SERVICIO - CREATEROOM');
+
         const { hostName, gameBoardType, secondsBalls, gameType } = req.body;
+        
+        logger.info('REQUEST', req.body);
 
         if (!hostName || !gameBoardType || !secondsBalls || !gameType) {
+            logger.warn('PETICIÓN FALLIDA');
+            logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
+            logger.warn('FIN PROCESO');
             return errorResponse(res, {
                 httpCode: 400,
                 code: "CR002",
@@ -27,6 +34,8 @@ export const createRoom = async (req, res) => {
 
         const room = await createRoomService(hostName, gameBoardType, secondsBalls, gameType);
 
+        logger.info('SALA CREADA CORRECTAMENTE');
+        logger.info('FIN PROCESO');
         return successResponse(res, {
             httpCode: 201,
             code: "CR001",
@@ -34,6 +43,8 @@ export const createRoom = async (req, res) => {
             data: room
         });
     } catch (error) {
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return errorResponse(res, {
             code: "CR003",
             message: error.message
@@ -42,11 +53,17 @@ export const createRoom = async (req, res) => {
 };
 
 export const joinRoom = async (req, res) => {
-
     try {
+        logger.info('INICIO DE SERVICIO - JOINROOM');
+        
         const { roomId, playerName } = req.body;
+        
+        logger.info('REQUEST', req.body);
 
         if (!roomId || !playerName) {
+            logger.warn('PETICIÓN FALLIDA');
+            logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
+            logger.warn('FIN PROCESO');
             return errorResponse(res, {
                 httpCode: 400,
                 code: "JR002",
@@ -56,6 +73,8 @@ export const joinRoom = async (req, res) => {
 
         const response = await joinRoomService(roomId, playerName);
 
+        logger.info('USUARIO INGRESADO A LA SALA CORRECTAMENTE');
+        logger.info('FIN PROCESO');
         return successResponse(res, {
             httpCode: 200,
             code: "JR001",
@@ -63,6 +82,8 @@ export const joinRoom = async (req, res) => {
             data: response
         });
     } catch (error) {
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return errorResponse(res, {
             httpCode: 500,
             code: "JR003",
@@ -73,13 +94,16 @@ export const joinRoom = async (req, res) => {
 
 export const updateRoom = async (req, res) => {
     try {
-        const {
-            roomId,
-            playerId,
-            status
-        } = req.body;
+        logger.info('INICIO DE SERVICIO - UPDATEROOM');
+
+        const { roomId, playerId, status } = req.body;
+
+        logger.info('REQUEST', req.body);
 
         if (!roomId || !playerId || !status) {
+            logger.warn('PETICIÓN FALLIDA');
+            logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
+            logger.warn('FIN PROCESO');
             return errorResponse(res, {
                 httpCode: 400,
                 code: "UR002",
@@ -93,6 +117,8 @@ export const updateRoom = async (req, res) => {
             status
         );
 
+        logger.info('SALA ACTUALIZADA CORRECTAMENTE');
+        logger.info('FIN PROCESO');
         return successResponse(res, {
             httpCode: 200,
             code: "UR001",
@@ -101,6 +127,8 @@ export const updateRoom = async (req, res) => {
         });
 
     } catch (error) {
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return errorResponse(res, {
             httpCode: 500,
             code: "UR003",
@@ -111,14 +139,16 @@ export const updateRoom = async (req, res) => {
 
 export const pauseRoom = async (req, res) => {
     try {
-        const {
-            roomId,
-            playerId,
-            status,
-            board
-        } = req.body;
+        logger.info('INICIO DE SERVICIO - PAUSEROOM');
+
+        const { roomId, playerId, status, board } = req.body;
+
+        logger.info('REQUEST', req.body);
 
         if (!roomId || !playerId || !status || !board) {
+            logger.warn('PETICIÓN FALLIDA');
+            logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
+            logger.warn('FIN PROCESO');
             return errorResponse(res, {
                 httpCode: 400,
                 code: "UR002",
@@ -126,12 +156,15 @@ export const pauseRoom = async (req, res) => {
             });
         }
 
-        const room = await pauseRoomService(
+        const room = await updateRoomServiceUser(
             roomId,
             playerId,
             status,
             board
         );
+
+        logger.info('SALA ACTUALIZADA CORRECTAMENTE');
+        logger.info('FIN PROCESO');
 
         return successResponse(res, {
             httpCode: 200,
@@ -141,6 +174,8 @@ export const pauseRoom = async (req, res) => {
         });
 
     } catch (error) {
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return errorResponse(res, {
             httpCode: 500,
             code: "UR003",
@@ -150,17 +185,26 @@ export const pauseRoom = async (req, res) => {
 };
 
 export const getRoom = async (req, res) => {
-
     try {
+        logger.info('INICIO DE SERVICIO - GETROOM');
 
         const { id } = req.params;
 
+        logger.info('REQUEST', req.body);
+
         const room = await getRoomService(id);
 
-        return res.status(200).json(room);
-
+        logger.info('SALA OBTENIDA CORRECTAMENTE');
+        logger.info('FIN PROCESO');
+        return successResponse(res, {
+            httpCode: 200,
+            code: "GR001",
+            message: 'Sala obtenida correctamente',
+            data: room
+        });
     } catch (error) {
-
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return res.status(404).json({
             message: error.message
         });
@@ -169,12 +213,15 @@ export const getRoom = async (req, res) => {
 
 export const generateBall = async (req, res) => {
     try {
-        const {
-            roomId,
-            playerId
-        } = req.body;
+        logger.info('INICIO DE SERVICIO - GENERATEBALL');
+        const { roomId, playerId } = req.body;
+
+        logger.info('REQUEST', req.body);
 
         if (!roomId || !playerId) {
+            logger.warn('PETICIÓN FALLIDA');
+            logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
+            logger.warn('FIN PROCESO');
             return errorResponse(res, {
                 httpCode: 400,
                 code: "GB002",
@@ -187,6 +234,8 @@ export const generateBall = async (req, res) => {
             playerId
         );
 
+        logger.info(`BOLITA GENERADA CORRECTAMENTE EN LA ROOM ${roomId}`);
+        logger.info('FIN PROCESO');
         return successResponse(res, {
             httpCode: 200,
             code: "GB001",
@@ -194,6 +243,8 @@ export const generateBall = async (req, res) => {
             data: ball
         });
     } catch (error) {
+        logger.error('HA OCURRIDO UN ERROR INTERNO', error);
+        logger.error('FIN PROCESO');
         return errorResponse(res, {
             httpCode: 200,
             code: "GB003",

@@ -15,7 +15,7 @@ router.post('/create', createRoom);
 router.post('/join', joinRoom);
 router.get('/:id', getRoom);
 router.post('/update', updateRoom);
-router.post('/pause', pauseRoom);
+router.post('/updateRoomUser', pauseRoom);
 router.post('/generateBall', generateBall);
 
 export default router;

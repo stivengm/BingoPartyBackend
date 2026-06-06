@@ -66,7 +66,7 @@ export const updateRoomService = async (roomId, playerId, status) => {
 
 };
 
-export const pauseRoomService = async (roomId, playerId, status, board) => {
+export const updateRoomServiceUser = async (roomId, playerId, status, board) => {
     const roomRef = db.ref(`rooms/${roomId}`);
     const snapshot = await roomRef.once('value');
 
@@ -81,22 +81,31 @@ export const pauseRoomService = async (roomId, playerId, status, board) => {
         throw new Error('Jugador no encontrado');
     }
 
-    if (status == "playing") {
-        if (!player.isHost) {
-            throw new Error('No tienes permisos para actualizar la sala');
-        }
-    }
-
-    await roomRef.update({
+    const updateData = {
         status,
         playerLastUpdateGame: player,
         boardLastUpdateGame: board
-    });
+    };
 
+    if (status === 'paused') {
+        updateData.pausedRemainingMs = room.nextBallAt
+            ? Math.max(
+                0,
+                room.nextBallAt - Date.now()
+            )
+            : room.secondsBalls * 1000;
+
+        updateData.nextBallAt = null;
+    }
+
+    if (status === 'playing') {
+        updateData.nextBallAt = Date.now() + (room.pausedRemainingMs || room.secondsBalls * 1000);
+        updateData.pausedRemainingMs = null;
+    }
+
+    await roomRef.update(updateData);
     const updatedSnapshot = await roomRef.once('value');
-
     return updatedSnapshot.val();
-
 };
 
 export const joinRoomService = async (roomId, playerName) => {
@@ -153,6 +162,13 @@ export const generateBallService = async (roomId, playerId) => {
 
     const room = snapshot.val();
 
+    if (room.status === 'paused') {
+        return {
+            code: 'GB002',
+            message: 'Juego pausado'
+        };
+    }
+
     const player = room.players?.[playerId];
 
     if (!player?.isHost) {
@@ -161,7 +177,8 @@ export const generateBallService = async (roomId, playerId) => {
 
     const calledBalls = room.calledBalls || {};
 
-    const usedNumbers = Object.values(calledBalls).map(ball => ball.number);
+    const usedNumbers = Object.values(calledBalls)
+        .map(ball => ball.number);
 
     const availableNumbers = [];
 
@@ -190,16 +207,22 @@ export const generateBallService = async (roomId, playerId) => {
         calledAt: Date.now()
     };
 
-    // Guardar bolita actual
-    await roomRef
-        .child('currentBall')
-        .set(ball);
+    // IMPORTANTE:
+    // La próxima bola debería salir dentro de room.secondsBalls
+    const nextBallAt = Date.now() + (room.secondsBalls * 1000);
 
-    // Guardar historial manteniendo orden cronológico
+    await roomRef.update({
+        currentBall: ball,
+        nextBallAt
+    });
+
     await roomRef
         .child('calledBalls')
         .push(ball);
 
-    return ball;
+    return {
+        ...ball,
+        nextBallAt
+    };
 
 };
