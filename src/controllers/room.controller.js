@@ -21,7 +21,7 @@ export const createRoom = async (req, res) => {
         
         logger.info('REQUEST', req.body);
 
-        if (!hostName || !gameBoardType || !secondsBalls || !gameType) {
+        if (!hostName || !gameBoardType || !secondsBalls || !gameType || !avatar) {
             logger.warn('PETICIÓN FALLIDA');
             logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
             logger.warn('FIN PROCESO');

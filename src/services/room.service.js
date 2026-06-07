@@ -2,9 +2,11 @@ import crypto from 'crypto';
 import db from '../config/firebase.js';
 import { generateRoomCode } from '../utils/generateRoomCode.js';
 import { getLetter } from '../utils/getLetterBall.js';
+import { logger } from '../utils/logs.js';
 
 export const createRoomService = async (hostName, gameBoardType, secondsBalls, gameType, avatar) => {
 
+    logger.info('INICIO DE PROCESO CREACIÓN DE SALA');
     const roomCode = generateRoomCode();
 
     const roomData = {
@@ -23,6 +25,8 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
         },
         players: {}
     };
+    
+    logger.info('SALA CREADA CON ID=', roomCode);
 
     roomData.players[roomData.host.id] = {
         avatar,
@@ -31,6 +35,8 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
         isHost: true,
         joinedAt: Date.now()
     };
+
+    logger.info('SE AÑADIÓ AL HOST A LA SALA DIRECTAMENTE');
 
     await db.ref(`rooms/${roomCode}`).set(roomData);
 
