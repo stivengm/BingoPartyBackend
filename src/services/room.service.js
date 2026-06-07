@@ -108,7 +108,7 @@ export const updateRoomServiceUser = async (roomId, playerId, status, board) => 
     return updatedSnapshot.val();
 };
 
-export const joinRoomService = async (roomId, playerName) => {
+export const joinRoomService = async (roomId, playerName, avatar) => {
 
     const roomRef = db.ref(`rooms/${roomId}`);
     const snapshot = await roomRef.once('value');
@@ -122,6 +122,7 @@ export const joinRoomService = async (roomId, playerName) => {
     const player = {
         id: playerId,
         name: playerName,
+        avatar,
         isHost: false,
         joinedAt: Date.now()
     };

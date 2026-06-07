@@ -56,11 +56,11 @@ export const joinRoom = async (req, res) => {
     try {
         logger.info('INICIO DE SERVICIO - JOINROOM');
         
-        const { roomId, playerName } = req.body;
+        const { roomId, playerName, avatar } = req.body;
         
         logger.info('REQUEST', req.body);
 
-        if (!roomId || !playerName) {
+        if (!roomId || !playerName || !avatar) {
             logger.warn('PETICIÓN FALLIDA');
             logger.warn('HACE FALTA INFORMACIÓN EN LA PETICIÓN');
             logger.warn('FIN PROCESO');
@@ -71,7 +71,7 @@ export const joinRoom = async (req, res) => {
             });
         }
 
-        const response = await joinRoomService(roomId, playerName);
+        const response = await joinRoomService(roomId, playerName, avatar);
 
         logger.info('USUARIO INGRESADO A LA SALA CORRECTAMENTE');
         logger.info('FIN PROCESO');
