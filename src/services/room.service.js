@@ -3,7 +3,7 @@ import db from '../config/firebase.js';
 import { generateRoomCode } from '../utils/generateRoomCode.js';
 import { getLetter } from '../utils/getLetterBall.js';
 
-export const createRoomService = async (hostName, gameBoardType, secondsBalls, gameType) => {
+export const createRoomService = async (hostName, gameBoardType, secondsBalls, gameType, avatar) => {
 
     const roomCode = generateRoomCode();
 
@@ -16,6 +16,7 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
         gameType,
         gameTypeName: gameType == 1 ? 'automatic' : 'manual',
         host: {
+            avatar,
             id: crypto.randomUUID(),
             name: hostName,
             isHost: true
@@ -24,6 +25,7 @@ export const createRoomService = async (hostName, gameBoardType, secondsBalls, g
     };
 
     roomData.players[roomData.host.id] = {
+        avatar,
         id: roomData.host.id,
         name: hostName,
         isHost: true,

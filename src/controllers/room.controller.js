@@ -17,7 +17,7 @@ export const createRoom = async (req, res) => {
     try {
         logger.info('INICIO DE SERVICIO - CREATEROOM');
 
-        const { hostName, gameBoardType, secondsBalls, gameType } = req.body;
+        const { hostName, gameBoardType, secondsBalls, gameType, avatar } = req.body;
         
         logger.info('REQUEST', req.body);
 
@@ -32,7 +32,7 @@ export const createRoom = async (req, res) => {
             });
         }
 
-        const room = await createRoomService(hostName, gameBoardType, secondsBalls, gameType);
+        const room = await createRoomService(hostName, gameBoardType, secondsBalls, gameType, avatar);
 
         logger.info('SALA CREADA CORRECTAMENTE');
         logger.info('FIN PROCESO');
